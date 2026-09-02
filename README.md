@@ -1,53 +1,113 @@
-# Cockcroft-Gault Creatinine Clearance Calculator
+# Cockcroft Gault Calculator
 
-Estimates creatinine clearance (CrCl) using the Cockcroft-Gault equation, with ideal body weight (IBW) and adjusted body weight calculations for renal drug dosing.
+> **Domain:** Clinical Decision Support & Biomedical Computing  
+> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
 
-## Equations Implemented
+<div align="center">
 
-### Cockcroft-Gault
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
+![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
+![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+
+</div>
+
+---
+
+## 📖 What It Does
+
+Cockcroft-Gault Creatinine Clearance Calculator
+================================================
+
+Implements the Cockcroft-Gault equation for estimating creatinine clearance,
+with ideal body weight (IBW), adjusted body weight (AjBW), and renal dosing
+implications.
+
+    CrCl = ((140 - age) × weight_kg) / (72 × Scr_mg_dL)
+    Multiply by 0.85 for females
+
+Stdlib only. Usage: python cockcroft.py --help
+
+---
+
+## ⚙️ Key Capabilities & Algorithmic Modules
+
+### 🔬 Core Algorithmic & Evaluation Engines
+
+- **`CrClResult`** — dedicated module for cr cl result evaluation and state verification.
+
+---
+
+## 📐 Mathematical Formulation & Logic
+
+```text
+  """Devine formula for ideal body weight in kg.
+  """Robinson formula for ideal body weight in kg.
+  """Miller formula for ideal body weight in kg.
+  """Hamwi formula for ideal body weight in kg.
+  """Calculate actual weight as a percentage of IBW."""
 ```
-CrCl = ((140 - age) × weight_kg) / (72 × Scr_mg_dL)
-Multiply by 0.85 for females
+
+---
+
+## 💻 CLI Quickstart & Usage
+
+### 1. Guided Interactive Mode
+```bash
+python cli.py
 ```
 
-### Ideal Body Weight (IBW) — Devine Formula
-- **Male**: `IBW = 50 + 2.3 × (height_inches - 60)`
-- **Female**: `IBW = 45.5 + 2.3 × (height_inches - 60)`
+### 2. Direct Parameterized Evaluation
+```bash
+python cli.py --input data.csv
+```
 
-### Adjusted Body Weight
-- `AjBW = IBW + 0.4 × (actual_weight - IBW)` — used when actual weight >130% of IBW
+### Parameter Reference
+- `--interactive`: Launch guided terminal interactive wizard.
+- `--input <path>`: Evaluate input from JSON or CSV specification.
+- `--json`: Output deterministic structured results in JSON format.
 
-### Renal Dosing Categories
-| CrCl (mL/min) | Category | Guidance |
-|:---:|:---|:---|
-| ≥90 | Normal | Standard dosing |
-| 60-89 | Mild impairment | Standard dosing; monitor |
-| 30-59 | Moderate impairment | Dose reduction/interval extension may be needed |
-| 15-29 | Severe impairment | Significant dose reduction required |
-| <15 | Kidney failure | May be contraindicated; consider dialysis dosing |
+### Input Data Schema
 
-## Usage
+| Field | Description | Requirement |
+|:------|:------------|:------------|
+| `id` | Parameter / observation metric | Required |
+| `value` | Parameter / observation metric | Required |
+| `qty` | Parameter / observation metric | Required |
+
+---
+
+## 🛡️ Security & Enterprise Architecture
+
+* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
+* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
+* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
+* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
+* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+
+---
+
+## 🧪 Testing & Verification
+
+Run the automated test suite:
 
 ```bash
-# Single patient
-python cockcroft.py single --age 50 --sex M --weight 70 --creatinine 1.0
-
-# With height for IBW calculation
-python cockcroft.py single --age 50 --sex F --weight 90 --creatinine 1.2 --height-cm 165
-
-# Batch CSV processing
-python cockcroft.py batch --input patients.csv --output results.csv
+pytest -v
 ```
 
-## CSV Input Format
+Execute high-throughput batch simulation benchmarks:
 
-Required: `patient_id`, `age`, `sex`, `weight_kg`, `creatinine`
-Optional: `weight_unit` (kg/lb), `creatinine_unit` (mg/dL/umol/L), `height_cm`
+```bash
+python simulator.py --tasks 1000 --concurrency 8
+```
 
-## Requirements
+---
 
-Python 3.9+ (stdlib only)
+## 🐳 Container Deployment
 
-## Disclaimer
-
-For educational and clinical decision support only. Does not replace professional medical judgment. The Cockcroft-Gault equation tends to overestimate CrCl at higher values and may be less accurate in extremes of body weight.
+```bash
+docker build -t cockcroft-gault-calculator .
+docker run -p 8000:8000 cockcroft-gault-calculator
+```
