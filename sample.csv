@@ -1,3 +1,7 @@
-id,value,qty
-A,10,2
-B,20,3
+patient_id,age,sex,weight_kg,weight_unit,creatinine,creatinine_unit,height_cm
+PT001,55,M,78.5,kg,1.1,mg/dL,175
+PT002,68,F,62.0,kg,1.4,mg/dL,160
+PT003,72,M,95.0,kg,2.1,mg/dL,170
+PT004,45,F,54.0,kg,0.8,mg/dL,165
+PT005,80,M,60.0,kg,1.8,mg/dL,168
+PT006,50,F,110.0,kg,1.2,mg/dL,162

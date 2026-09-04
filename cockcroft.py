@@ -385,8 +385,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     single.add_argument("--height-cm", type=float, default=None, help="Height in cm (optional, for IBW)")
 
     batch = subparsers.add_parser("batch", help="Batch CSV processing")
-    batch.add_argument("--input", required=True, help="Input CSV path")
-    batch.add_argument("--output", required=True, help="Output CSV path")
+    batch.add_argument("-i", "--input", required=True, help="Input CSV path")
+    batch.add_argument("-o", "--output", required=True, help="Output CSV path")
 
     return parser
 

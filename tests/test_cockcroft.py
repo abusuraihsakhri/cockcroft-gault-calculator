@@ -273,6 +273,18 @@ def test_cli_batch():
         assert os.path.exists(out)
 
 
+def test_cli_batch_short_flags():
+    with tempfile.TemporaryDirectory() as tmp:
+        inp = os.path.join(tmp, "in.csv")
+        out = os.path.join(tmp, "out.csv")
+        with open(inp, "w", newline="") as f:
+            f.write("patient_id,age,sex,weight_kg,weight_unit,creatinine,creatinine_unit,height_cm\n")
+            f.write("T2,60,F,65,kg,1.1,mg/dL,160\n")
+        rc = cg.main(["batch", "-i", inp, "-o", out])
+        assert rc == 0
+        assert os.path.exists(out)
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
