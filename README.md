@@ -1,136 +1,82 @@
-# Cockcroft-Gault Creatinine Clearance Calculator
+# Cockcroft–Gault Creatinine Clearance Calculator
 
-A robust clinical computing tool implementing the Cockcroft-Gault equation for estimating creatinine clearance (CrCl), comprehensive Ideal Body Weight (IBW) and Adjusted Body Weight (AjBW) models, and renal drug dose adjustment stratification.
+### [Open the Live Application →](https://abusuraihsakhri.github.io/cockcroft-gault-calculator/)
 
----
+A small, dependency-free calculator for estimating adult creatinine clearance (CrCl) with the Cockcroft–Gault equation. The repository includes a Python CLI/library, CSV batch processing, and a compact browser interface.
 
-## Clinical Domain & Mathematical Principles
+## Features
 
-The Cockcroft-Gault formula (1976) remains one of the primary clinical standards for evaluating renal elimination capacity and calculating drug dose adjustments (e.g., direct oral anticoagulants, aminoglycosides, glycopeptides, chemotherapeutic regimens).
+- Cockcroft–Gault CrCl using serum creatinine in mg/dL or µmol/L.
+- Weight input in kilograms or pounds.
+- Optional Devine ideal body weight (IBW) and adjusted body weight (AjBW) estimates when height is supplied.
+- Gap-free CrCl reference bands for display only.
+- Single-patient CLI and batch CSV processing.
+- Static browser application with light/dark theme; calculations stay in the browser.
+- Automated Python and browser-logic tests in GitHub Actions.
 
-### 1. Primary Cockcroft-Gault Equation
+## Clinical scope and limitations
 
-```text
-CrCl (male, mL/min)   = [(140 - age) * weight_kg] / [72 * Scr_mg_dL]
-CrCl (female, mL/min) = CrCl (male) * 0.85
-```
+The implemented equation is:
 
-When serum creatinine is reported in umol/L, conversion to mg/dL is performed:
-```text
-Scr (mg/dL) = Scr (umol/L) / 88.4
-```
+~~~text
+CrCl (male, mL/min)   = [(140 - age) × weight_kg] / [72 × Scr_mg/dL]
+CrCl (female, mL/min) = CrCl (male) × 0.85
+~~~
 
----
+The original Cockcroft–Gault publication derived the equation in adults and used a 15% lower estimate for females. This project therefore rejects pediatric ages and mathematically invalid or non-positive inputs.
 
-### 2. Ideal Body Weight (IBW) Formulations
+Weight selection is not universal. When height is supplied, the calculator reports actual-weight and Devine-IBW estimates and retains the historical project heuristic of using AjBW when actual weight exceeds 130% of IBW. That auto-selection is explicitly flagged because the appropriate kidney-function equation, weight convention, and cutoff depend on the drug label or local protocol.
 
-Body composition significantly affects serum creatinine generation. The calculator supports standard formulas based on height in inches (height_in = height_cm / 2.54):
+The displayed CrCl bands are **not CKD staging** and do not provide a generic dose recommendation. For clinical dosing, use the current product label and relevant institutional guidance.
 
-| Method | Male IBW (kg) | Female IBW (kg) |
-|:-------|:--------------|:----------------|
-| **Devine (1974)** *(Default)* | 50.0 + 2.3 * (height_in - 60) | 45.5 + 2.3 * (height_in - 60) |
-| **Robinson (1983)** | 52.0 + 1.9 * (height_in - 60) | 49.0 + 1.7 * (height_in - 60) |
-| **Miller (1983)** | 56.2 + 1.41 * (height_in - 60) | 53.1 + 1.36 * (height_in - 60) |
-| **Hamwi (1964)** | 48.0 + 2.7 * (height_in - 60) | 45.5 + 2.2 * (height_in - 60) |
+References:
 
----
+- Cockcroft DW, Gault MH. *Prediction of creatinine clearance from serum creatinine.* Nephron. 1976;16(1):31–41. doi:10.1159/000180580.
+- NIDDK. *Determining Drug Dosing in Adults with Chronic Kidney Disease.*
 
-### 3. Weight Selection Algorithm & Adjusted Body Weight (AjBW)
+## Browser use
 
-In obesity, using actual body weight substantially overestimates clearance due to inactive adipose tissue mass, while using IBW underestimates clearance due to renal hypertrophy.
+Open the live application, enter age, sex, body weight, serum creatinine, and optional height, then select **Calculate**. No data are sent to a server by the application; calculations execute locally in the browser.
 
-```text
-% IBW = (Weight_actual / IBW) * 100
-AjBW (kg) = IBW + 0.4 * (Weight_actual - IBW)
-```
+The browser interface uses a small JavaScript implementation of the same equations rather than Pyodide. This avoids loading a multi-megabyte Python runtime for a simple calculator while the Python CLI remains the source implementation for command-line and batch workflows.
 
-```
-+-------------------------------------------------------------+
-|                Weight Selection Decision Rule               |
-+-------------------------------------------------------------+
-| Actual Weight < IBW:       Use Actual Body Weight           |
-| Actual Weight 100% - 130%: Use Actual Body Weight           |
-| Actual Weight > 130% IBW:  Use Adjusted Body Weight (AjBW)  |
-+-------------------------------------------------------------+
-```
+## Command line
 
----
+Single patient:
 
-### 4. Renal Function Stratification & Dose Guidance
+~~~bash
+python cli.py single --age 55 --sex M --weight 78.5 --creatinine 1.1 --height-cm 175
+~~~
 
-```
-+----------------+---------------------+---------------------------------------------------+
-| CrCl (mL/min)  | Stage / Category    | Clinical Pharmacotherapy Guidance                 |
-+----------------+---------------------+---------------------------------------------------+
-| >= 90          | Normal function     | Standard adult dosing                             |
-| 60 - 89        | Mild impairment     | Standard dosing for most drugs; monitor           |
-| 30 - 59        | Moderate impairment | Dose reduction or interval extension may be needed|
-| 15 - 29        | Severe impairment   | Significant dose reduction required; consult ref  |
-| < 15           | Kidney failure      | Dialysis-dependent; strict clearance dosing       |
-+----------------+---------------------+---------------------------------------------------+
-```
+Using pounds and µmol/L:
 
----
+~~~bash
+python cli.py single --age 68 --sex F --weight 137 --weight-unit lbs --creatinine 123.8 --creatinine-unit umol/L --height-cm 160
+~~~
 
-## CLI Quickstart & Usage
+Batch CSV:
 
-The application provides a command-line interface via `cli.py` (or `cockcroft.py`) supporting both single-patient calculations and high-throughput batch CSV processing.
-
-### 1. Single Patient Mode
-
-Calculate clearance for a single patient with optional height for IBW and AjBW:
-
-```bash
-# Standard calculation (mg/dL)
-python cli.py single --age 55 --sex M --weight 78.5 --creatinine 1.1
-
-# Calculation with height (cm) and SI units (umol/L)
-python cli.py single --age 68 --sex F --weight 62 --creatinine 123.8 --creatinine-unit umol/L --height-cm 160
-```
-
-### 2. Batch CSV Processing
-
-Process multi-patient cohorts with automatic weight adjustment and clinical risk categorization:
-
-```bash
-# Short flags (-i, -o)
+~~~bash
 python cli.py batch -i sample.csv -o results.csv
+~~~
 
-# Long flags (--input, --output)
-python cli.py batch --input sample.csv --output results.csv
-```
+Required CSV columns are `patient_id`, `age`, `sex`, `weight_kg`, and `creatinine`. Optional columns are `weight_unit`, `creatinine_unit`, and `height_cm`. Invalid rows are retained in the output with a validation message rather than terminating the full batch.
 
-### Batch Input Schema (`sample.csv`)
+## Development and tests
 
-| Column Name | Type | Description | Example |
-|:------------|:-----|:------------|:--------|
-| `patient_id` | string | Unique patient / specimen identifier | `PT001` |
-| `age` | float | Age in years | `55` |
-| `sex` | char | Biological sex (`M` or `F`) | `M` |
-| `weight_kg` | float | Measured weight | `78.5` |
-| `weight_unit` | string | Unit: `kg` or `lbs` (default: `kg`) | `kg` |
-| `creatinine` | float | Serum creatinine value | `1.1` |
-| `creatinine_unit` | string | Unit: `mg/dL` or `umol/L` (default: `mg/dL`) | `mg/dL` |
-| `height_cm` | float (optional) | Height in cm for IBW / AjBW calculation | `175` |
+Runtime code uses only the Python standard library. Tests require `pytest`; browser calculation tests use Node.js without third-party packages.
 
----
+~~~bash
+python -m pip install pytest
+python -m pytest -q
+node --test tests/test_web.mjs
+python -m compileall -q cockcroft.py cli.py tests
+~~~
 
-## Testing & Verification
+## Browser compatibility
 
-Run the full automated test suite:
-
-```bash
-python -m pytest -p no:zarr -v
-```
-
-Execute batch CLI smoke verification:
-
-```bash
-python cli.py batch -i sample.csv -o out_smoke.csv
-```
-
----
+The web interface targets current versions of Chrome, Edge, Firefox, and Safari with native ES modules enabled.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License. See [LICENSE](LICENSE).
