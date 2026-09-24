@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Cockcroft-Gault creatinine clearance calculator with optional IBW and adjusted-weight estimates.">
+  <title>Cockcroft-Gault Calculator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Cockcroft–Gault Calculator</h1>
+        <p>Creatinine-clearance estimate for adults</p>
+      </div>
+      <button id="theme-toggle" class="icon-button" type="button" aria-label="Use dark theme">☾</button>
+    </header>
+
+    <div class="layout">
+      <section class="card form-card" aria-labelledby="input-heading">
+        <div class="section-title">
+          <h2 id="input-heading">Patient inputs</h2>
+          <span>Required unless marked optional</span>
+        </div>
+
+        <form id="calculator-form" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="age">Age, years</label>
+              <input id="age" name="age" type="number" min="18" max="139.9" step="0.1" value="55" required inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="sex">Sex used by equation</label>
+              <select id="sex" name="sex" required>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="weight">Body weight</label>
+              <div class="input-group">
+                <input id="weight" name="weight" type="number" min="0.1" step="0.1" value="78.5" required inputmode="decimal">
+                <select name="weightUnit" aria-label="Weight unit">
+                  <option value="kg">kg</option>
+                  <option value="lbs">lb</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label for="creatinine">Serum creatinine</label>
+              <div class="input-group">
+                <input id="creatinine" name="creatinine" type="number" min="0.01" step="0.01" value="1.1" required inputmode="decimal">
+                <select name="creatinineUnit" aria-label="Creatinine unit">
+                  <option value="mg/dL">mg/dL</option>
+                  <option value="umol/L">µmol/L</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label for="heightCm">Height, cm <span aria-hidden="true">·</span> optional for IBW/AjBW</label>
+              <input id="heightCm" name="heightCm" type="number" min="1" step="0.1" value="175" inputmode="decimal">
+            </div>
+          </div>
+          <button class="primary-button" type="submit">Calculate</button>
+        </form>
+      </section>
+
+      <section class="card result-card" aria-live="polite">
+        <div id="empty-state" class="empty">
+          <div>
+            <strong>Ready to calculate</strong>
+            <div>Enter patient values and select Calculate.</div>
+          </div>
+        </div>
+
+        <div id="error-box" class="error" role="alert" hidden></div>
+
+        <div id="result-panel" hidden>
+          <div class="hero-result">
+            <div>
+              <div class="kicker">Auto-selected estimate</div>
+              <div id="primary-crcl" class="primary-value">—</div>
+              <div id="primary-basis" class="basis">—</div>
+            </div>
+            <div id="band" class="band-chip">—</div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric"><span>Actual BW CrCl</span><strong><span id="actual-crcl">—</span> mL/min</strong></div>
+            <div class="metric"><span>Weight</span><strong><span id="weight-kg">—</span> kg</strong></div>
+            <div class="metric"><span>Creatinine</span><strong><span id="scr-mgdl">—</span> mg/dL</strong></div>
+          </div>
+
+          <table class="table" aria-label="Alternative weight estimates">
+            <thead><tr><th>Weight basis</th><th>Weight</th><th>CrCl, mL/min</th></tr></thead>
+            <tbody>
+              <tr><td>Actual</td><td>Input</td><td><span id="actual-crcl-copy">—</span></td></tr>
+              <tr id="ibw-row" hidden><td>Devine IBW</td><td><span id="ibw-weight">—</span> kg</td><td><span id="ibw-crcl">—</span></td></tr>
+              <tr id="adjusted-row" hidden><td>Adjusted BW</td><td><span id="adjusted-weight">—</span> kg</td><td><span id="adjusted-crcl">—</span></td></tr>
+            </tbody>
+          </table>
+
+          <p id="selection-note" class="note" hidden></p>
+          <p class="disclaimer"><strong>Clinical use:</strong> this is an estimate, not CKD staging or a universal dosing rule. Use the kidney-function method and threshold specified in the current drug label or local protocol.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
